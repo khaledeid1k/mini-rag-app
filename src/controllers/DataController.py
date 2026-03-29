@@ -19,7 +19,7 @@ class DataController(BaseController):
 
         return True , ResponseStatus.FILE_VALID.value
     
-    def generate_unique_filename(self, original_filename: str,profile_id:str):
+    def generate_unique_filePath(self, original_filename: str,profile_id:str):
         random_key = self.generate_random_string()
         prject_path = ProjectController().get_project_path(project_id=profile_id)
         clean_filename = self.clean_filename(original_filename=original_filename)
@@ -28,7 +28,7 @@ class DataController(BaseController):
             random_key = self.generate_random_string()
             new_file_path = os.path.join(prject_path, f"{random_key}_{clean_filename}")
 
-        return new_file_path
+        return new_file_path , f"{random_key}_{clean_filename}"
 
     def clean_filename(self, original_filename: str):
         # Remove any characters that are not alphanumeric, dots, underscores, or hyphens
