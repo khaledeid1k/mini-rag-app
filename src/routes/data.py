@@ -1,12 +1,14 @@
 from signal import signal
 
-from fastapi import FastAPI, APIRouter , Depends,UploadFile,status
+from fastapi import APIRouter , Depends,UploadFile,status
 from fastapi.responses import JSONResponse 
 from helpers.config import get_settings,Settings
 from controllers import DataController, ProjectController 
 import aiofiles
-import os
 from models import ResponseStatus
+import logging
+
+logger = logging.getLogger("uvicorn.error")
  
 data_router = APIRouter(
     prefix="/api/v1/data",
@@ -27,10 +29,14 @@ async def upload_file(project_id: str, file: UploadFile, appsettings : Settings=
     project_dir_path = ProjectController().get_project_path(project_id=project_id)
     file_path = data_controller.  generate_unique_filename(original_filename=file.filename, profile_id=project_id)
 
-    async with aiofiles.open(file_path, 'wb') as out_file:
-        while chunk := await file.read(appsettings.FILE_DEFAULT_CHUNK_SIZE):  
-            await out_file.write(chunk)
 
+    try:
+        async with aiofiles.open(file_path, 'wb') as out_file:
+            while chunk := await file.read(appsettings.FILE_DEFAULT_CHUNK_SIZE):  
+                await out_file.write(chunk)
+    except Exception as e:
+        logger.error(f"Error while uploading file: {e}")
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST) 
     return JSONResponse(content={
         "signal": ResponseStatus.FILE_UPLOAD_SUCCESS.value,
          
