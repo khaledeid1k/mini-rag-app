@@ -17,14 +17,15 @@ data_router = APIRouter(
 @data_router.post("/upload/{project_id}")
 
 async def upload_file(project_id: str, file: UploadFile, appsettings : Settings=Depends(get_settings)):
-    is_valid , message = DataController().validate_upload_file(file)
+    data_controller = DataController()
+    is_valid , message = data_controller .validate_upload_file(file)
     if not is_valid:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": message})  
     # else:
     #     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": message})
     
     project_dir_path = ProjectController().get_project_path(project_id=project_id)
-    file_path = os.path.join(project_dir_path, file.filename)
+    file_path = data_controller.  generate_unique_filename(original_filename=file.filename, profile_id=project_id)
 
     async with aiofiles.open(file_path, 'wb') as out_file:
         while chunk := await file.read(appsettings.FILE_DEFAULT_CHUNK_SIZE):  
