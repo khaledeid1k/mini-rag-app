@@ -7,6 +7,9 @@ class Settings(BaseSettings):
    FILE_ALLOWED_EXTENSIONS : list
    FILE_MAX_SIZE : int
    FILE_DEFAULT_CHUNK_SIZE : int
+   MONGO_URI : str
+   MONGO_DB_NAME : str
+   MONGO_COLLECTION_NAME : str
    
 
 
