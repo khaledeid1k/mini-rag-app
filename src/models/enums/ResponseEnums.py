@@ -7,3 +7,5 @@ class ResponseStatus(Enum):
     FILE_VALID = "File is valid"
     FILE_UPLOAD_SUCCESS = "File uploaded successfully"
     FILE_UPLOAD_FAILED = "File upload failed" 
+    FILE_PROCESSING_FAILED = "File processing failed"
+    FILE_PROCESSING_SUCCESS = "File processed successfully"
