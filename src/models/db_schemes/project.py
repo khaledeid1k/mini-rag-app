@@ -3,7 +3,7 @@ from typing import Optional
 from bson.objectid import ObjectId
 
 class Project(BaseModel):
-    _id: Optional[ObjectId]
+    id: Optional[ObjectId] = Field(None, alias="_id")  # maps MongoDB's _id
     project_id: str = Field(..., min_length=1)
 
     @validator('project_id')
@@ -13,5 +13,7 @@ class Project(BaseModel):
         return value
     
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {
+        "arbitrary_types_allowed": True,  # needed for ObjectId
+        "populate_by_name": True,         # allows using 'id' OR '_id'
+    }
