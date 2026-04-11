@@ -59,6 +59,7 @@ async def process_file(project_id: str, request: Request,base_request: BaseReque
     file_id = base_request.file_id
     chunk_size = base_request.chunk_size
     overlap_size = base_request.overlap_size
+    do_reset = base_request.do_reset
 
 
     project_model = ProjectModel(db_client=request.app.state.db_client)
@@ -92,6 +93,12 @@ async def process_file(project_id: str, request: Request,base_request: BaseReque
          ]
     
     chunk_model = ChunckModel(db_client=request.app.state.db_client)
+
+
+    if do_reset==True : 
+        _ = await chunk_model.delete_chuncks_by_project_id(project_id=project.id)
+
+    
 
     no_of_chunks_inserted = await chunk_model.insert_multiple_chuncks(chuncks=file_chunks_records)
 

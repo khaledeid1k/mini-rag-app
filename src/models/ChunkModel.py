@@ -20,7 +20,7 @@ class ChunckModel(BaseDataModel):
     
     async def get_chuncks_by_file_id(self,chunck_id:str):
 
-        cursor = self.collection.findone({"_id": ObjectId(chunck_id)})  
+        cursor = await self.collection.find_one({"_id": ObjectId(chunck_id)})  
 
         if cursor is None:
             return None
@@ -43,3 +43,10 @@ class ChunckModel(BaseDataModel):
         result = await self.collection.bulk_write(operations)
 
         return len(chuncks)
+    
+
+
+    async def delete_chuncks_by_project_id(self,project_id:ObjectId):
+
+        result = await self.collection.delete_many({"chunk_project_id ": project_id})
+        return result.deleted_count
