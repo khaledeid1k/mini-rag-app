@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional
 from bson.objectid import ObjectId
+from pymongo import ASCENDING
 
 class DataChunk(BaseModel):
     _id: Optional[ObjectId]
@@ -13,3 +14,15 @@ class DataChunk(BaseModel):
  
     class Config:
         arbitrary_types_allowed = True
+
+
+    @classmethod
+    def get_indexes(cls):
+        return [{
+            
+                "key": [("chunk_project_id", ASCENDING)],
+                "name": "chunk_project_id_index_1",
+                "unique": False
+        }
+            ]
+        

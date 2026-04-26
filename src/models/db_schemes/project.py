@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional
 from bson.objectid import ObjectId
+from pymongo import ASCENDING
 
 class Project(BaseModel):
     id: Optional[ObjectId] = Field(None, alias="_id")  # maps MongoDB's _id
@@ -17,3 +18,16 @@ class Project(BaseModel):
         "arbitrary_types_allowed": True,  # needed for ObjectId
         "populate_by_name": True,         # allows using 'id' OR '_id'
     }
+
+
+
+    @classmethod
+    def get_indexes(cls):
+        return [{
+            
+                "key": [("project_id", ASCENDING)],
+                "name": "project_id_index_1",
+                "unique": True
+        }
+            ]
+        

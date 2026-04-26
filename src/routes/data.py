@@ -26,7 +26,7 @@ data_router = APIRouter(
 async def upload_file(request: Request, project_id: str, file: UploadFile, appsettings : Settings=Depends(get_settings)):
 
 
-    project_model = ProjectModel(db_client=request.app.state.db_client)
+    project_model =await ProjectModel.create_instance(db_client=request.app.state.db_client)
 
     project= await project_model.get_project_or_create_one(project_id=project_id)
 
@@ -62,12 +62,14 @@ async def process_file(project_id: str, request: Request,base_request: BaseReque
     do_reset = base_request.do_reset
 
 
-    project_model = ProjectModel(db_client=request.app.state.db_client)
+    project_model = await ProjectModel.create_instance(db_client=request.app.state.db_client)
 
     project= await project_model.get_project_or_create_one(project_id=project_id)
 
     process_controller = ProcessController(project_id=project_id)
     file_content = process_controller.get_file_content(file_id=file_id)
+    if file_content is None:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": ResponseStatus.FILE_TYPE_NOT_ALLOWED.value})
     chunks = process_controller.process_file_content(file_content=file_content, 
                                                      file_id=file_id,
                                                        chunk_size=chunk_size,
@@ -92,7 +94,7 @@ async def process_file(project_id: str, request: Request,base_request: BaseReque
          for i, chunk in enumerate(chunks)
          ]
     
-    chunk_model = ChunckModel(db_client=request.app.state.db_client)
+    chunk_model = await ChunckModel.create_instance(db_client=request.app.state.db_client)
 
 
     if do_reset==True : 

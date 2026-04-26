@@ -6,7 +6,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from models.enums.ProcessingEnum import ProcessingEnum
 
-
+ 
 
 class ProcessController(BaseController):
     def __init__(self,project_id:str):
@@ -23,7 +23,10 @@ class ProcessController(BaseController):
 
     def get_file_content(self, file_id:str):
        loader = self.get_file_loader(file_id=file_id)
+       if loader is None:
+             return None  # caller already checks for None
        return loader.load()
+    
     
 
     def get_file_loader(self, file_id:str):
