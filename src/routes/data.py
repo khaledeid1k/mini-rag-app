@@ -9,9 +9,11 @@ import aiofiles
 from models import ResponseStatus
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunckModel
+from models.AssetModel import AssetModel
 import logging
 from routes.schemes.data import BaseRequest
-from models.db_schemes import DataChunk
+from models.db_schemes import DataChunk , Asset
+import os
 
 logger = logging.getLogger("uvicorn.error")
  
@@ -48,10 +50,20 @@ async def upload_file(request: Request, project_id: str, file: UploadFile, appse
     except Exception as e:
         logger.error(f"Error while uploading file: {e}")
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST) 
+    #store asset into db
+    asset_model = await AssetModel.create_instance(db_client=request.app.state.db_client)
+    asset_resource = Asset(
+        asset_id=file_id,
+        asset_project_id=project.id,
+        asset_type="file",
+        asset_name=file_id,
+        asset_size=os.path.getsize(file_path),
+    )
+    asset_recorde=   await asset_model.create_asset(asset=asset_resource)
+
     return JSONResponse(content={
         "signal": ResponseStatus.FILE_UPLOAD_SUCCESS.value,
-        "file_id": file_id,
-         
+        "file_id": str(asset_recorde.id),
     })  
 
 @data_router.post("/process/{project_id}")
