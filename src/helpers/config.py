@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -11,6 +13,24 @@ class Settings(BaseSettings):
    MONGO_DB_NAME : str
    MONGO_COLLECTION_NAME : str
    
+   GENERATION_BACKEND: str
+   EMBEDDING_BACKEND: str
+
+   OPENAI_API_KEY: str = None
+   OPENAI_API_URL: str = None
+   COHERE_API_KEY: str = None
+
+   GENERATION_MODEL_ID_LITERAL: List[str] = None
+   GENERATION_MODEL_ID: str = None
+   EMBEDDING_MODEL_ID: str = None
+   EMBEDDING_MODEL_SIZE: int = None
+   INPUT_DAFAULT_MAX_CHARACTERS: int = None
+   GENERATION_DAFAULT_MAX_TOKENS: int = None
+   GENERATION_DAFAULT_TEMPERATURE: float = None
+
+   VECTOR_DB_BACKEND : str
+   VECTOR_DB_PATH : str
+   fVECTOR_DB_DISTANCE_METHOD: str = None
 
 
    class Config:

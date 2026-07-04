@@ -1,7 +1,7 @@
 import logging
 
 from ..LLMInterface import LLMInterface
-from ..LLMEnums import CohereEnums, OpenAIEnums
+from ..LLMEnums import CohereEnums, DocumentType, OpenAIEnums
 from cohere import Cohere
 
 class CohereProvider(LLMInterface):
@@ -48,15 +48,49 @@ class CohereProvider(LLMInterface):
             if self.generate_model_id is None:
                 logging.error("Generate model ID is not set.")
                 return None
+            
+            max_output_tokens = max_output_tokens or self.default_output_max_tokens
+            temperature = temperature if temperature is not None else self.default_temperature
+            
             response = self.client.chat(
             model=self.generate_model_id,
             chat_history=chat_history,
             messages= self.process_text(prompt), 
+            max_tokens= max_output_tokens ,
             max_tokens=max_output_tokens or self.default_output_max_tokens,
-            max_tokens=max_output_tokens or self.default_output_max_tokens,
-            temperature=temperature if temperature is not None else self.default_temperature
-        )
+            temperature=temperature
+            )
+            
+            if not response or not response.text:
+                logging.error("No response received from Cohere API.")
+                return None
+            return response.text.strip()
             
 
     def construct_prompt(self, prompt: str, role: str):
         return {"role": role, "text": self.process_text(prompt)}
+    
+
+    def embed_text(self, text: str, document_type: str = None):
+        if self.client is None:
+            logging.error("Cohere client is not initialized.")
+            return None
+        
+        if self.embedding_model_id is None:
+            logging.error("Embedding model ID is not set.")
+            return None
+        
+        input_type = CohereEnums.DOCUMENT.value  
+        if document_type == DocumentType.QUERY.value:
+            input_type = CohereEnums.QUERY.value
+
+        response = self.client.embed(
+            model=self.embedding_model_id,
+            texts=[self.process_text(text)],
+            input_type=input_type,
+            embedding_types=["float"],
+        )
+        if not response or not response.embeddings or len(response.embeddings) == 0:
+            logging.error("No embeddings returned from Cohere API.")
+            return None
+        return response.embeddings.float[0]
