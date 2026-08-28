@@ -30,7 +30,7 @@ class Settings(BaseSettings):
 
    VECTOR_DB_BACKEND : str
    VECTOR_DB_PATH : str
-   fVECTOR_DB_DISTANCE_METHOD: str = None
+   VECTOR_DB_DISTANCE_METHOD: str = None
 
 
    class Config:

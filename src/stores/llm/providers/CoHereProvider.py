@@ -1,8 +1,7 @@
 import logging
-
+import cohere
 from ..LLMInterface import LLMInterface
 from ..LLMEnums import CohereEnums, DocumentType, OpenAIEnums
-from cohere import Cohere
 
 class CohereProvider(LLMInterface):
     def __init__(self, api_key: str,default_input_max_chars: int = 1000,
@@ -18,7 +17,7 @@ class CohereProvider(LLMInterface):
         self.embedding_model_id = None
         self.embedding_size = None
 
-        self.client = Cohere(api_key=self.api_key)
+        self.client = cohere.Client(api_key=self.api_key)
 
 
         self.logger = logging.getLogger(__name__)
@@ -56,7 +55,6 @@ class CohereProvider(LLMInterface):
             model=self.generate_model_id,
             chat_history=chat_history,
             messages= self.process_text(prompt), 
-            max_tokens= max_output_tokens ,
             max_tokens=max_output_tokens or self.default_output_max_tokens,
             temperature=temperature
             )

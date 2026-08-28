@@ -8,6 +8,7 @@ class QdrantDBProvider(VectorDBInterface):
     def __init__(self,dp_path:str,distance_method:str):
         self.client = None
         self.distance_method = None
+        self.dp_path = dp_path 
 
 
         if distance_method == DistanceMethodEnums.COSINE.value:
@@ -91,6 +92,7 @@ class QdrantDBProvider(VectorDBInterface):
                 collection_name=collection_name,
                 records=[
                     models.Record(
+                        id=[record_id],
                         vector=vector,
                         payload={"text": text, **(metadata or {})}
                     )
@@ -117,7 +119,7 @@ class QdrantDBProvider(VectorDBInterface):
             metadata = [None] * len(texts)
 
         if record_ids in None:
-            record_ids = [None] * len(texts)
+            record_ids = list(range(0, len(texts)))
 
         
         for i in range(0, len(texts), batch_size):
@@ -125,9 +127,11 @@ class QdrantDBProvider(VectorDBInterface):
             batch_texts = texts[i:batch_end]
             batch_vectors = vectors[i:batch_end]
             batch_metadata = metadata[i:batch_end]
+            batch_record_ids = record_ids[i:batch_end]
  
             batch_records = [
                models.Record(
+                    id=batch_record_ids[x],
                     vector=batch_vectors[x],
                     payload={"text": batch_texts[x], **(batch_metadata[x] or {})}
                 )

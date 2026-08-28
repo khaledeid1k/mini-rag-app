@@ -11,3 +11,5 @@ class ResponseStatus(Enum):
     FILE_PROCESSING_SUCCESS = "File processed successfully"
     NO_FILES_TO_PROCESS = "No files to process"
     FILE_NOT_FOUND = "File not found"
+    INSERT_INTO_VECTOR_DB_FAILED = "Failed to insert into vector database"
+    INSERT_INTO_VECTOR_DB_SUCCESS = "Successfully inserted into vector database"
