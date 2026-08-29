@@ -13,3 +13,6 @@ class ResponseStatus(Enum):
     FILE_NOT_FOUND = "File not found"
     INSERT_INTO_VECTOR_DB_FAILED = "Failed to insert into vector database"
     INSERT_INTO_VECTOR_DB_SUCCESS = "Successfully inserted into vector database"
+    VECTOR_DB_COLLECTION_RETRIEVE_SUCCESS = "Successfully retrieved vector database collection"
+    SEARCH_VECTOR_DB_COLLECTION_FAILED = "Failed to search vector database collection"
+    SEARCH_VECTOR_DB_COLLECTION_SUCCESS = "Successfully searched vector database collection"

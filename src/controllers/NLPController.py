@@ -2,11 +2,12 @@ from .BaseController import BaseController
 from models.db_schemes import Project , DataChunk
 from typing import List, Dict
 from stores.llm.LLMEnums import DocumentType
+import json
 
 
 class NLPController(BaseController):
-    def __init__(self,app,generation_client,embedding_client,vector_db_client):
-        super().__init__(app)
+    def __init__(self,generation_client,embedding_client,vector_db_client):
+        super().__init__()
         self.generation_client = generation_client
         self.embedding_client = embedding_client
         self.vector_db_client = vector_db_client
@@ -24,8 +25,10 @@ class NLPController(BaseController):
 
     def get_vector_db_collection_info(self,project: Project):
         collection_name = self.create_collection_name(project_id=project.project_id)
-        return self.vector_db_client.get_collection_info(collection_name=collection_name)
-    
+        collection_info= self.vector_db_client.get_collection_info(collection_name=collection_name)
+        return json.loads(
+            json.dumps(collection_info, default=lambda x: x.__dict__)
+        )
 
     def index_into_vector_db(self,project: Project, chunks: List[DataChunk],chunk_ids: List[int], do_reset: bool = False):
         
@@ -34,7 +37,13 @@ class NLPController(BaseController):
         
         # step 2 : mange item
         texts = [chunk.chunk_text for chunk in chunks]
-        metadata = [{"chunk_order": chunk.chunk_order, "chunk_asset_id": chunk.chunk_asset_id} for chunk in chunks]
+        metadata = [
+            {
+                "chunk_order": chunk.chunk_order,
+                "chunk_asset_id": str(chunk.chunk_asset_id) if chunk.chunk_asset_id else None,
+            }
+            for chunk in chunks
+        ]
         vectors = [
             self.embedding_client.embed_text(text=text, document_type=DocumentType.DOCUMENT.value)
             for text in texts
@@ -48,11 +57,29 @@ class NLPController(BaseController):
         
         # step 4 : insert data into collection
 
-        self.vector_db_client.insert_many(
+        is_inserted = self.vector_db_client.insert_many(
             collection_name=collection_name, 
             texts=texts,
               vectors=vectors,
                 metadata=metadata,
                 record_ids=chunk_ids)
         
-        return True 
+        return is_inserted 
+
+
+    def search_vector_db_collection(self,project: Project, query: str, limit: int = 5):
+        collection_name = self.create_collection_name(project_id=project.project_id)
+        query_vector = self.embedding_client.embed_text(text=query, document_type=DocumentType.QUERY.value)
+        if query_vector is None or len(query_vector) == 0 :
+            raise ValueError("Failed to generate embedding for the query.")
+        
+        search_results = self.vector_db_client.search_by_vector(
+            collection_name=collection_name,
+            query_vector=query_vector,
+            limit=limit
+        )
+        if search_results is None:
+            raise ValueError("No search results returned from the vector database.")
+        return json.loads(
+            json.dumps(search_results, default=lambda x: x.__dict__)
+        )

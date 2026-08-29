@@ -47,23 +47,24 @@ class ChunckModel(BaseDataModel):
 
     async def insert_multiple_chuncks(self,chuncks:list,batch_size:int=100):
 
+        inserted_count = 0
         for i in range(0 , len(chuncks) , batch_size):
             batch = chuncks[i:i+batch_size]
 
+            operations = [
+                InsertOne(chunck.dict(by_alias=True,exclude_unset=True))
+                for chunck in batch]
 
-        operations = [
-            InsertOne(chunck.dict(by_alias=True,exclude_unset=True))
-            for chunck in batch]
+            result = await self.collection.bulk_write(operations)
+            inserted_count += result.inserted_count
 
-        result = await self.collection.bulk_write(operations)
-
-        return len(chuncks)
+        return inserted_count
     
 
 
     async def delete_chuncks_by_project_id(self,project_id:ObjectId):
 
-        result = await self.collection.delete_many({"chunk_project_id ": project_id})
+        result = await self.collection.delete_many({"chunk_project_id": project_id})
         return result.deleted_count
     
 

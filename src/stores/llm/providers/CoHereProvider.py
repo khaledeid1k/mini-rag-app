@@ -25,7 +25,7 @@ class CohereProvider(LLMInterface):
     def process_text(self, text: str):
         if len(text) > self.default_input_max_chars:
             logging.warning(f"Input text exceeds the maximum character limit of {self.default_input_max_chars}. It will be truncated.")
-            return text[:self.default_input_max_chars].split()
+            return text[:self.default_input_max_chars]
         return text
 
 
@@ -88,7 +88,8 @@ class CohereProvider(LLMInterface):
             input_type=input_type,
             embedding_types=["float"],
         )
-        if not response or not response.embeddings or len(response.embeddings) == 0:
+        embeddings = response.embeddings.float_ if response and response.embeddings else None
+        if not embeddings:
             logging.error("No embeddings returned from Cohere API.")
             return None
-        return response.embeddings.float[0]
+        return embeddings[0]
