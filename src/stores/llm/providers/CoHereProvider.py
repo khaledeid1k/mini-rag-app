@@ -19,7 +19,7 @@ class CohereProvider(LLMInterface):
 
         self.client = cohere.Client(api_key=self.api_key)
 
-
+        self.enums = CohereEnums
         self.logger = logging.getLogger(__name__)
 
     def process_text(self, text: str):
@@ -54,7 +54,7 @@ class CohereProvider(LLMInterface):
             response = self.client.chat(
             model=self.generate_model_id,
             chat_history=chat_history,
-            messages= self.process_text(prompt), 
+            message= self.process_text(prompt), 
             max_tokens=max_output_tokens or self.default_output_max_tokens,
             temperature=temperature
             )

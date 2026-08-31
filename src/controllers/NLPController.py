@@ -6,11 +6,12 @@ import json
 
 
 class NLPController(BaseController):
-    def __init__(self,generation_client,embedding_client,vector_db_client):
+    def __init__(self,generation_client,embedding_client,vector_db_client,template_parser):
         super().__init__()
         self.generation_client = generation_client
         self.embedding_client = embedding_client
         self.vector_db_client = vector_db_client
+        self.template_parser = template_parser
 
 
     
@@ -79,7 +80,44 @@ class NLPController(BaseController):
             limit=limit
         )
         if search_results is None:
-            raise ValueError("No search results returned from the vector database.")
-        return json.loads(
-            json.dumps(search_results, default=lambda x: x.__dict__)
+            return None
+        return search_results
+
+    def answer_rag_question(self,project: Project, query: str, limit: int = 10):
+        search_results = self.search_vector_db_collection(project=project, query=query, limit=limit)
+
+        if search_results is None or len(search_results) == 0: 
+            raise ValueError("Failed to retrieve search results from the vector database.")
+        
+        system_prompt = self.template_parser.get("rag", "system_prompt")
+
+        documents_prompts = "\n".join([
+            self.template_parser.get("rag", "document_prompt", {
+                    "doc_num": idx + 1,
+                    "chunk_text": self.generation_client.process_text(doc.text),
+            })
+            for idx, doc in enumerate(search_results)
+        ])
+
+        footer_prompt = self.template_parser.get("rag", "footer_prompt", {
+            "query": query
+        })
+
+        # step3: Construct Generation Client Prompts
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role=self.generation_client.enums.SYSTEM.value,
+            )
+        ]
+
+        full_prompt = "\n\n".join([ documents_prompts,  footer_prompt])
+
+        # step4: Retrieve the Answer
+        answer = self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
         )
+
+        return answer, full_prompt, chat_history
+

@@ -16,3 +16,5 @@ class ResponseStatus(Enum):
     VECTOR_DB_COLLECTION_RETRIEVE_SUCCESS = "Successfully retrieved vector database collection"
     SEARCH_VECTOR_DB_COLLECTION_FAILED = "Failed to search vector database collection"
     SEARCH_VECTOR_DB_COLLECTION_SUCCESS = "Successfully searched vector database collection"
+    ANSWER_RAG_QUESTION_FAILED = "Failed to answer RAG question"
+    ANSWER_RAG_QUESTION_SUCCESS = "Successfully answered RAG question"
