@@ -6,6 +6,14 @@ from stores.llm.LLMProvidersFactory import LLMProividersFactory
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
 from stores.llm.templates.template_parser import TemplateParser
 
+
+# # Import metrics setup
+# from utils.metrics import setup_metrics
+
+# app = FastAPI()
+
+# # Setup Prometheus metrics
+# setup_metrics(app)
 app = FastAPI()
 
 @app.on_event("startup")

@@ -32,7 +32,7 @@ class OpenAIProvider(LLMInterface):
     def process_text(self, text: str):
         if len(text) > self.default_input_max_chars:
             logging.warning(f"Input text exceeds the maximum character limit of {self.default_input_max_chars}. It will be truncated.")
-            return text[:self.default_input_max_chars].split()
+            return text[:self.default_input_max_chars]
         return text
 
 
@@ -45,7 +45,7 @@ class OpenAIProvider(LLMInterface):
         self.embedding_size = embedding_size
 
 
-    def generate_text(self, prompt: str,chat_history: list=[],max_output_tokens: int=None,
+    def generate_text(self, prompt: str,chat_history: list=None,max_output_tokens: int=None,
                       temperature: float=None) :  
         if self.client is None:
             logging.error("OpenAI client is not initialized.")
@@ -54,6 +54,9 @@ class OpenAIProvider(LLMInterface):
         if self.generate_model_id is None:
             logging.error("Generate model ID is not set.")
             return None
+
+        if chat_history is None:
+            chat_history = []
         
         max_output_tokens = max_output_tokens or self.default_output_max_tokens
         temperature = temperature if temperature is not None else self.default_temperature

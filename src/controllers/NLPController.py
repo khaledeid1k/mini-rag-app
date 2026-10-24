@@ -3,6 +3,7 @@ from models.db_schemes import Project , DataChunk
 from typing import List, Dict
 from stores.llm.LLMEnums import DocumentType
 import json
+import time
 
 
 class NLPController(BaseController):
@@ -45,10 +46,11 @@ class NLPController(BaseController):
             }
             for chunk in chunks
         ]
-        vectors = [
-            self.embedding_client.embed_text(text=text, document_type=DocumentType.DOCUMENT.value)
-            for text in texts
-        ]
+        vectors = []
+        for text in texts:
+            vector = self.embedding_client.embed_text(text=text, document_type=DocumentType.DOCUMENT.value)
+            vectors.append(vector)
+            time.sleep(0.7)  # Respect Cohere Trial key rate limit (100 calls/min)
 
         # step 3 : create collection if not exists
         self.vector_db_client.create_collection(
